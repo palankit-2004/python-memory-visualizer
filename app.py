@@ -20,9 +20,13 @@ b.append(4)
 ```
 """)
 
-user_code = st.text_area("✍️ Enter your Python code:", height=150, value="""x = 10
+user_code = st.text_area(
+    "✍️ Enter your Python code:",
+    height=200,
+    value="""x = 10
 y = x
-y += 1""")
+y += 1"""
+)
 
 if st.button("🚀 Visualize"):
     try:
@@ -40,12 +44,21 @@ if st.button("🚀 Visualize"):
 
         dot = graphviz.Digraph()
 
-        # Object memory nodes (no outer memory cluster)
-        for obj_id, val in object_ids.items():
-            label = f"{val}\n(id: {obj_id})"
-            dot.node(str(obj_id), label=label, shape="box", style="filled", color="#E6F2FF", width="2", height="1.5")
+        # Fixed Memory Cluster (forced layout look using rank and fixed padding)
+        with dot.subgraph(name='cluster_memory') as mem:
+            mem.attr(label='Memory', style='filled', color='lightgrey', margin="1.0", labelloc="t")
+            mem.attr(rank="same")  # keep them on the same horizontal level
 
-        # Variable references
+            # Add padding nodes to simulate a fixed large box visually
+            for i in range(3):
+                mem.node(f"pad_left_{i}", label="", width="0.01", style="invis")
+                mem.node(f"pad_right_{i}", label="", width="0.01", style="invis")
+
+            for obj_id, val in object_ids.items():
+                label = f"{val}\n(id: {obj_id})"
+                mem.node(str(obj_id), label=label, shape="box", style="filled", color="#E6F2FF", width="2", height="1.5")
+
+        # Variables outside memory
         for var, obj_id in references.items():
             dot.node(var, shape="ellipse", style="filled", color="#FFEDD5", width="1.5", height="1.5")
             dot.edge(var, str(obj_id))
