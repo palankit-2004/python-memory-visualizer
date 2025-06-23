@@ -40,15 +40,12 @@ if st.button("🚀 Visualize"):
 
         dot = graphviz.Digraph()
 
-        # Memory cluster
-        with dot.subgraph(name='cluster_memory') as mem:
-            mem.attr(label='📦 Memory')
-            mem.attr(style='filled', color='lightgrey')
-            for obj_id, val in object_ids.items():
-                label = f"{val}\n(id: {obj_id})"
-                mem.node(str(obj_id), label=label, shape="box", style="filled", color="#E6F2FF", width="2", height="1.5")
+        # Object memory nodes (no outer memory cluster)
+        for obj_id, val in object_ids.items():
+            label = f"{val}\n(id: {obj_id})"
+            dot.node(str(obj_id), label=label, shape="box", style="filled", color="#E6F2FF", width="2", height="1.5")
 
-        # Variable references outside memory box
+        # Variable references
         for var, obj_id in references.items():
             dot.node(var, shape="ellipse", style="filled", color="#FFEDD5", width="1.5", height="1.5")
             dot.edge(var, str(obj_id))
